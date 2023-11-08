@@ -2,24 +2,78 @@ const User = require("../Model/UserModel");
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken')
 const multer = require('multer')
+const sharp = require('sharp')
 
+const multerStorage = multer.memoryStorage();
+const multerFilter = (req,file,cb)=>{
+    if(file.mimetype.startsWith('image')){
+        cb(null,true)
+    }else{
+        cb(new AppError('Not an image !, Please upload only Images',400),false)
+    }
+}
+const upload = multer({
+    storage:multerStorage,
+    fileFilter : multerFilter
+})
+exports.uploadUserProfile =upload.single('profile')
 
+exports.resizeUserProfile = async (req,res,next)=>{
+  try {
+    if(!req.file) return next();
+    req.file.filename = `user-${req.body.email}-${Date.now()}.jpeg`;
+    req.body.profile = req.file.filename
+    await sharp(req.file.buffer)
+    .resize(500,500)
+    .toFormat('jpeg')
+    .jpeg({quality:90}).toFile(`public/profile/${req.file.filename}`);
+    next();
+  } catch (error) {
+    res.json({error:'error in resizing image'})
+    console.log(error.message)
+  }
+}
 
 exports.editProfile = async (req,res)=>{
-  const {name,mobile,image,email} = req.body
   try {
-    console.log(req.body)
-    await User.findOneAndUpdate({email:email},{$set:{
-      name,
-      mobile,
-      profile:image
-    }}).then(user=>{
-      return  res.json({success:'profile updated Successfully',user})
-    }).catch(err=>  res.json({error:'failed to update profile'}))
+    const data = {
+      name:req.body.name,
+      mobile:req.body.mobile
+    }
+    if(req.body.profile){
+      data.profile=req.body.profile
+    }
+    
+    
+    const updatedData = await User.findOneAndUpdate({email:req.body.email},data)
+    res.status(200).json({
+      success:'profile updated successfully',
+      user:updatedData,
+      data : updatedData
+    })
   } catch (error) {
     console.log(error.message)
   }
 }
+
+
+
+
+// exports.editProfile = async (req,res)=>{
+//   const {name,mobile,image,email} = req.body
+//   try {
+//     console.log(req.body)
+//     await User.findOneAndUpdate({email:email},{$set:{
+//       name,
+//       mobile,
+//       profile:image
+//     }}).then(user=>{
+//       return  res.json({success:'profile updated Successfully',user})
+//     }).catch(err=>  res.json({error:'failed to update profile'}))
+//   } catch (error) {
+//     console.log(error.message)
+//   }
+// }
 
 
 exports.checkLogged =  (req,res)=>{

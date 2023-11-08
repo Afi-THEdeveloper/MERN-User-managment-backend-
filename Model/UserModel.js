@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
   mobile: { type: Number, required: true },
   isAdmin: { type: Boolean, required: true, default: false },
   isVerified: { type: Boolean, required: true, default: false },
-  profile: { type: String, default: "" },
+  profile: { type: String, default: "avatar.png" },
 });
 
 module.exports = mongoose.model("User", userSchema);

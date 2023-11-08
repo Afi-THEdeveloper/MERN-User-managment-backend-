@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const cookieParser = require('cookie-parser')
+const path = require('path')
 const userController = require('./controller/UserController')
 const adminController = require('./controller/AdminController')
 const {islogged,isloggedOut,isAdminlogged,isAdminloggedOut} = require('./Middlewares/Auth')
@@ -15,6 +16,8 @@ app.use(cors({
     methods:['POST','GET'],
     credentials:true
 }))
+app.use(express.urlencoded({extended:true}))
+app.use(express.static(path.join(__dirname, 'public')))
 
 mongoose
   .connect("mongodb://127.0.0.1:27017/USM-MERN")
@@ -25,7 +28,8 @@ mongoose
 app.post('/register',isloggedOut,userController.registerUser)
 app.post('/login',isloggedOut, userController.loginUser)
 app.get('/userLogout',islogged,userController.userLogout)
-app.post('/editProfile',islogged,userController.editProfile)
+app.post('/editProfile',islogged,userController.uploadUserProfile,userController.resizeUserProfile, userController.editProfile)
+
     
 //session managment routes
 app.get('/checkLogged',islogged, userController.checkLogged)
