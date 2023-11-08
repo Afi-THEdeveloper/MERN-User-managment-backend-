@@ -41,6 +41,7 @@ app.get('/logoutAdmin',isAdminlogged, adminController.logoutAdmin)
 app.post('/UpdateUser',isAdminlogged, adminController.updateUser)
 app.post('/deleteUser',isAdminlogged, adminController.deleteUser)
 app.get('/getUsers',isAdminlogged,adminController.getUsers)
+app.post('/createUser',isAdminlogged, adminController.createUser)
 
  
 app.listen(5000, () => {

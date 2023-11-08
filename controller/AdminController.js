@@ -77,6 +77,61 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
+
+exports.createUser = async(req, res) => {
+  const { name, email, mobile, password, verify } = req.body;
+  const existingEmail = await User.findOne({email:email})
+
+  try {
+    //validations
+    if(!name){
+      return res.json({ error: "name required" })
+    }
+    if(name.length<3){
+      return res.json({ error: "name should be atleast 3 letters" })
+    }
+    if(!email){
+      return res.json({ error: "email required" })
+    }
+    if(!email.includes('@gmail.com'||'@GMAIL.COM')){
+      return res.json({ error: "Enter a valid Email" })
+    }
+    if(!mobile){
+      return res.json({ error: "mobile required" })
+    }
+    if(mobile.length!==10){
+      return res.json({ error: "Enter a valid mobile number" })
+    }
+    if(!password){
+      return res.json({ error: "password required" })
+    }
+    if(password.length<6){
+      return res.json({ error: "password must be greater than 6 letters" })
+    }
+    if(existingEmail){
+      return res.json({ error: 'user already exits.Please enter another email' })
+    }
+   
+
+    bcrypt.hash(password, 10).then((hash) => {
+      User.create({
+        name,
+        mobile,
+        email,
+        password: hash,
+        isVerified: verify,
+      })
+        .then(async (user) => {
+          const users = await User.find({ isAdmin: false });
+          res.json({ success: "user created", users });
+        })
+        .catch((err) => res.json({ error: "error in creating user" }));
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 exports.logoutAdmin = (req, res) => {
   const token = req.cookies.adminToken;
   if (token) {
