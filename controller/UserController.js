@@ -59,23 +59,6 @@ exports.editProfile = async (req,res)=>{
 
 
 
-// exports.editProfile = async (req,res)=>{
-//   const {name,mobile,image,email} = req.body
-//   try {
-//     console.log(req.body)
-//     await User.findOneAndUpdate({email:email},{$set:{
-//       name,
-//       mobile,
-//       profile:image
-//     }}).then(user=>{
-//       return  res.json({success:'profile updated Successfully',user})
-//     }).catch(err=>  res.json({error:'failed to update profile'}))
-//   } catch (error) {
-//     console.log(error.message)
-//   }
-// }
-
-
 exports.checkLogged =  (req,res)=>{
     token= req.cookies.token
     if (!token) {
